@@ -2,6 +2,10 @@
 #include <SoftwareSerial.h>
 #include <TinyGPS++.h>
 
+//set the height of the building and the standard temperature
+const float buildingHeight = 2.5;
+const float standardTemperature = 70.0;
+
 int seconds = 0;
 
 //for Ultrasonic sensor
@@ -47,6 +51,19 @@ void setup()
   //Baud rate for GPS communication
   gpsSerial.begin(9600);
 
+  //introduce myself
+  lcd_1.setCursor(0, 0);
+  lcd_1.print("Sepehr LATIFI AZAD");
+  lcd_1.setCursor(5, 1);
+  lcd_1.print("190254082");
+  delay(500);
+  for(int position = 0; position < 4; position++){
+  	lcd_1.scrollDisplayLeft();
+    delay(500);
+  }
+  delay(1000);
+  lcd_1.clear();
+
   //show the sensor status on the LCD
   
   //Distance measurement
@@ -69,10 +86,6 @@ void setup()
 
 void loop()
 {
-  //set the height of the building and the standard temperature
-  float buildingHeight = 3.0;
-  float standardTemperature = 70.0;
-
   //for ultrasonic sensor
   float duration;
   float meter;
@@ -110,19 +123,19 @@ void loop()
   lcd_1.setCursor(0, 1);
   lcd_1.print(temperatureC);
   lcd_1.print(" C");
-  
-  
-  while (gpsSerial.available() > 0) {
-    if (gps.encode(gpsSerial.read())) {
-      if (gps.location.isValid()) {
-        // Retrieve latitude and longitude
-        float latitude = gps.location.lat();
-        float longitude = gps.location.lng();
-        //check if the house is collapsed
-        if(meter < buildingHeight){
+
+  //check if the house is collapsed
+  if(meter < buildingHeight){
+    while (gpsSerial.available() > 0) {
+      if (gps.encode(gpsSerial.read())) {
+        if (gps.location.isValid()) {
+          // Retrieve latitude and longitude
+          float latitude = gps.location.lat();
+          float longitude = gps.location.lng();
           String location = "Latitude: " + String(latitude, 6) + "\nLongitude: " + String(longitude, 6);
           //check the temperature in case of fire in the building
           if(temperatureC > standardTemperature){
+            //reporting the fire
             //send SMS to the emergency department
             String message = "Emergency! A building at the below coordination has collapsed. The temperature in the building is " + String(temperatureC) + "°C. An emergency team is required immediately. \n" + location;
             sendSMS("911", message.c_str());
@@ -131,12 +144,12 @@ void loop()
             String message = "Emergency! A building at the below coordination has been collapsed, an Emergency team is required immediately. \n" + location;
             sendSMS("911", message.c_str());
           }
-            while(true){
+          while(true){
               tone(buzzerPin, 1000); // Send 1KHz sound signal
               delay(800);
   	          noTone(buzzerPin); // Stop the tone
   	          delay(200); 
-            }
+          }
         }
       }
     }
