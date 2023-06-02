@@ -76,7 +76,7 @@ void setup()
   
   //Temperature measurement
   lcd_1.setCursor(0, 1);
-  Serial.print("T: ");
+  lcd_1.print("T: ");
   
   //Set the buzzer pin as output
   pinMode(buzzerPin, OUTPUT);
@@ -120,7 +120,7 @@ void loop()
   lcd_1.print(batteryPercentage);
   
   //show the temperature on the LCD
-  lcd_1.setCursor(0, 1);
+  lcd_1.setCursor(3, 1);
   lcd_1.print(temperatureC);
   lcd_1.print(" C");
 
